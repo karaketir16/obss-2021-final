@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require("axios")
+const moment = require("moment")
 /* GET home page. */
 router.get('/api/v1/echo/:queryText', function (req, res, next) {
     res.send(req.params['queryText']);
@@ -96,47 +97,56 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
 
     let users = req.body;
 
-    let all_issues = [];
-    for (const user of users){
-        let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
-                jql:"assignee=" + user, maxResults:999999
-            }})
-        all_issues.push(...jira.data.issues);
-    }
+    // console.log(users)
+    if(users.length > 0){
+        console.log(users)
+        let all_issues = [];
+        for (const user of users){
+            let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
+                    jql:"assignee=" + user, maxResults:999999
+                }})
+            all_issues.push(...jira.data.issues);
+        }
 
-    let projects = {};
+        let projects = {};
 
-    // console.log(all_issues);
+        // console.log(all_issues);
 
-    for (const issue of all_issues){
-        let project = issue.fields.project;
-        if(project){
-            if(projects[project.key] === undefined){
-                projects[project.key] = project;
-                projects[project.key].issueCount = 1;
-            } else {
-                projects[project.key].issueCount += 1;
+        for (const issue of all_issues){
+            let project = issue.fields.project;
+            if(project){
+                if(projects[project.key] === undefined){
+                    projects[project.key] = project;
+                    projects[project.key].issueCount = 1;
+                } else {
+                    projects[project.key].issueCount += 1;
+                }
             }
         }
+
+        // console.log(users)
+        let project_list = []
+        for (const key in projects){
+            if(projects[key].issueCount >= minn){
+                project_list.push(projects[key]);
+            }
+        }
+        project_list.sort((a,b)=> {
+            if (a.issueCount === b.issueCount){
+                return a.name > b.name ? 1 : -1;
+            }
+            return a.issueCount < b.issueCount ? 1 : -1;
+        })
+        // console.log(user_list)
+        let ans = project_list.slice(0, topm);
+
+        res.json(ans);
+    } else {
+        res.status(500);
+        res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":500,"errors":"usersnotfound"});
     }
 
-    // console.log(users)
-    let project_list = []
-    for (const key in projects){
-        if(projects[key].issueCount >= minn){
-            project_list.push(projects[key]);
-        }
-    }
-    project_list.sort((a,b)=> {
-        if (a.issueCount === b.issueCount){
-            return a.name > b.name ? 1 : -1;
-        }
-        return a.issueCount < b.issueCount ? 1 : -1;
-    })
-    // console.log(user_list)
-    let ans = project_list.slice(0, topm);
 
-    res.json(ans);
 });
 
 

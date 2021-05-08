@@ -4,6 +4,8 @@ const axios = require("axios")
 const moment = require("moment")
 /* GET home page. */
 
+const MAX_RESULTS = 999999;
+
 router.post('/api/v1/echo/:queryText', async function (req, res, next) {
     res.status(405);
     res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'POST' not supported"});
@@ -86,18 +88,29 @@ router.get('/api/v1/issues/subtasks', async function (req, res, next) {
         return;
     }
 
-    let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
-        jql:"project=" + req.query.projectId, maxResults:999999
-    }})
+    let all_issues = [];
+    let more = true;
+    let start = 0
+    while(more){
+        let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
+                jql:"project=" + req.query.projectId, maxResults:MAX_RESULTS, startAt:start
+            }})
+        all_issues.push(...jira.data.issues)
+        if(jira.data.issues.length !== MAX_RESULTS){
+            more = false;
+        }
+        start += MAX_RESULTS;
+    }
+
 
     // console.log(jira.data)
     // return null;
 
     let subtask = []
 
-    for (let i = 0; i < jira.data.issues.length; i++) {
-        if (jira.data.issues[i].fields.issuetype.subtask) {
-            subtask.push(jira.data.issues[i])
+    for (let i = 0; i < all_issues.length; i++) {
+        if (all_issues[i].fields.issuetype.subtask) {
+            subtask.push(all_issues[i])
         }
     }
     // res.json(not_subtask);
@@ -133,10 +146,18 @@ router.post('/api/v1/users/find-top-n-users', async function (req, res, next) {
 
     let all_issues = [];
     for (const project of projects){
-        let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
-                jql:"project=" + project, maxResults:999999
-        }})
-        all_issues.push(...jira.data.issues);
+        let more = true;
+        let start = 0;
+        while(more){
+            let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
+                    jql:"project=" + project, maxResults:MAX_RESULTS, startAt: start
+                }})
+            all_issues.push(...jira.data.issues);
+            if(jira.data.issues.length !== MAX_RESULTS){
+                more = false;
+            }
+            start += MAX_RESULTS;
+        }
     }
     let users = {
 
@@ -206,18 +227,22 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
 
     let users = req.body;
 
-    console.log(users);
-    console.log(users.length);
-    console.log(users === []);
-
     if( (!isEmpty(users)) && users.length > 0){
-        console.log(users)
+        // console.log(users)
         let all_issues = [];
         for (const user of users){
-            let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
-                    jql:"assignee=" + user, maxResults:999999
-                }})
-            all_issues.push(...jira.data.issues);
+            let more = true;
+            let start = 0;
+            while(more){
+                let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
+                        jql:"assignee=" + user, maxResults:MAX_RESULTS, startAt: start
+                    }})
+                all_issues.push(...jira.data.issues);
+                if(jira.data.issues.length !== MAX_RESULTS){
+                    more = false;
+                }
+                start += MAX_RESULTS;
+            }
         }
 
         let projects = {};

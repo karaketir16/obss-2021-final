@@ -3,6 +3,15 @@ const router = express.Router();
 const axios = require("axios")
 const moment = require("moment")
 /* GET home page. */
+
+router.post('/api/v1/echo/:queryText', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'POST' not supported"});
+})
+router.put('/api/v1/echo/:queryText', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'PUT' not supported"});
+})
 router.get('/api/v1/echo/:queryText', function (req, res, next) {
     res.send(req.params['queryText']);
 });
@@ -24,6 +33,14 @@ async function jiraNotAvailable(url){
     return false;
 }
 
+router.post('/api/v1/issuetypes', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'POST' not supported"});
+})
+router.put('/api/v1/issuetypes', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'PUT' not supported"});
+})
 router.get('/api/v1/issuetypes', async function (req, res, next) {
     // res.render('index', { title: 'Express' });
     let x = jiraURLnot(req.query.jiraUrl);
@@ -46,6 +63,14 @@ router.get('/api/v1/issuetypes', async function (req, res, next) {
 
 });
 
+router.post('/api/v1/issues/subtasks', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'POST' not supported"});
+})
+router.put('/api/v1/issues/subtasks', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'PUT' not supported"});
+})
 router.get('/api/v1/issues/subtasks', async function (req, res, next) {
     let x = jiraURLnot(req.query.jiraUrl);
     if(x){
@@ -80,6 +105,14 @@ router.get('/api/v1/issues/subtasks', async function (req, res, next) {
 
 });
 
+router.get('/api/v1/users/find-top-n-users', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'GET' not supported"});
+})
+router.put('/api/v1/users/find-top-n-users', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'PUT' not supported"});
+})
 router.post('/api/v1/users/find-top-n-users', async function (req, res, next) {
     let x = jiraURLnot(req.query.jiraUrl);
     if(x){
@@ -145,6 +178,14 @@ function isEmpty(obj) {
 }
 
 // http://localhost:8080/api/v1/projects/find-min-n-issues?jiraUrl={jiraUrl}&minn={minn}&topm={topm}
+router.get('/api/v1/projects/find-min-n-issues', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'GET' not supported"});
+})
+router.put('/api/v1/projects/find-min-n-issues', async function (req, res, next) {
+    res.status(405);
+    res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":405,"errors":"Request method 'PUT' not supported"});
+})
 router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next) {
     let x = jiraURLnot(req.query.jiraUrl);
     if(x){

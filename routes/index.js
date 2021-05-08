@@ -4,7 +4,7 @@ const axios = require("axios")
 const moment = require("moment")
 /* GET home page. */
 
-const MAX_RESULTS = 999999;
+const MAX_RESULTS = 250;
 
 router.post('/api/v1/echo/:queryText', async function (req, res, next) {
     res.status(405);
@@ -53,7 +53,6 @@ router.get('/api/v1/issuetypes', async function (req, res, next) {
     }
     x = await jiraNotAvailable(req.query.jiraUrl);
     if(x){
-        console.log(x)
         res.status(x.status);
         res.json(x);
         return;
@@ -82,7 +81,6 @@ router.get('/api/v1/issues/subtasks', async function (req, res, next) {
     }
     x = await jiraNotAvailable(req.query.jiraUrl);
     if(x){
-        console.log(x)
         res.status(x.status);
         res.json(x);
         return;
@@ -135,14 +133,12 @@ router.post('/api/v1/users/find-top-n-users', async function (req, res, next) {
     }
     x = await jiraNotAvailable(req.query.jiraUrl);
     if(x){
-        console.log(x)
         res.status(x.status);
         res.json(x);
         return;
     }
 
     let projects = req.body
-    console.log(req.body);
 
     let all_issues = [];
     for (const project of projects){
@@ -216,7 +212,6 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
     }
     x = await jiraNotAvailable(req.query.jiraUrl);
     if(x){
-        console.log(x)
         res.status(x.status);
         res.json(x);
         return;

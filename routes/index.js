@@ -7,22 +7,59 @@ router.get('/api/v1/echo/:queryText', function (req, res, next) {
     res.send(req.params['queryText']);
 });
 
-router.get('/api/v1/issuetypes', function (req, res, next) {
+function jiraURLnot(url){
+    if(url === undefined || url === ""){
+        return {"timestamp":moment().format("YYYY-MM-DD"),"status":400,"errors":"Required String parameter 'jiraUrl' is not present"}
+    } else {
+        return false
+    }
+}
+
+async function jiraNotAvailable(url){
+    try{
+        let jira = await axios.get(url + "rest/api/2/status");
+    } catch (e) {
+        return {"timestamp":moment().format("YYYY-MM-DD"),"status":500,"errors":"Jira is not available"}
+    }
+    return false;
+}
+
+router.get('/api/v1/issuetypes', async function (req, res, next) {
     // res.render('index', { title: 'Express' });
-    axios.get(req.query.jiraUrl + "rest/api/2/issuetype").then(jira => {
-        // let not_subtask = []
-        // for(let i = 0; i < jira.data.length; i++){
-        //   if( ! jira.data[i]["subtask"]){
-        //     console.log(jira.data);
-        //     not_subtask.push(jira.data[i]);
-        //   }
-        // }
-        // res.json(not_subtask);
-        res.json(jira.data);
-    });
+    let x = jiraURLnot(req.query.jiraUrl);
+    if(x){
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
+    x = await jiraNotAvailable(req.query.jiraUrl);
+    if(x){
+        console.log(x)
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
+
+    let jira = await axios.get(req.query.jiraUrl + "rest/api/2/issuetype")
+
+    res.json(jira.data);
+
 });
 
 router.get('/api/v1/issues/subtasks', async function (req, res, next) {
+    let x = jiraURLnot(req.query.jiraUrl);
+    if(x){
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
+    x = await jiraNotAvailable(req.query.jiraUrl);
+    if(x){
+        console.log(x)
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
 
     let jira = await axios.get(req.query.jiraUrl + "rest/api/2/search", {params: {
         jql:"project=" + req.query.projectId, maxResults:999999
@@ -44,6 +81,19 @@ router.get('/api/v1/issues/subtasks', async function (req, res, next) {
 });
 
 router.post('/api/v1/users/find-top-n-users', async function (req, res, next) {
+    let x = jiraURLnot(req.query.jiraUrl);
+    if(x){
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
+    x = await jiraNotAvailable(req.query.jiraUrl);
+    if(x){
+        console.log(x)
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
 
     let projects = req.body
     console.log(req.body);
@@ -96,6 +146,19 @@ function isEmpty(obj) {
 
 // http://localhost:8080/api/v1/projects/find-min-n-issues?jiraUrl={jiraUrl}&minn={minn}&topm={topm}
 router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next) {
+    let x = jiraURLnot(req.query.jiraUrl);
+    if(x){
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
+    x = await jiraNotAvailable(req.query.jiraUrl);
+    if(x){
+        console.log(x)
+        res.status(x.status);
+        res.json(x);
+        return;
+    }
 
     let minn = req.query.minn ? req.query.minn : 5;
     let topm = req.query.topm ? req.query.topm : 10;
@@ -151,10 +214,10 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
         res.json(ans);
     } else if (users.length !== undefined){
         res.status(500);
-        res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":500,"errors":"usersnotfound"});
+        res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":500,"errors":"users not found"});
     } else{
         res.status(400);
-        res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":400,"errors":"Requiredrequestbodyismissing"});
+        res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":400,"errors":"Required request body is missing"});
     }
 
 

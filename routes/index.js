@@ -21,20 +21,22 @@ router.get('/api/v1/issuetypes', function(req, res, next) {
   });
 });
 
-router.get('/api/v1/issues/subtasks', function(req, res, next) {
+router.get('/api/v1/issues/subtasks', async function(req, res, next) {
   // res.render('index', { title: 'Express' });
   console.log(req.query.jiraUrl)
-  axios.get(req.query.jiraUrl + "rest/api/2/project/" + req.query.projectId).then(jira => {
-    // let not_subtask = []
-    for(let i = 0; i < jira.data.length; i++){
-      if( ! jira.data[i]["subtask"]){
-        console.log(jira.data);
-        not_subtask.push(jira.data[i]);
-      }
+  let jira = await axios.get(req.query.jiraUrl + "rest/api/2/project/" + req.query.projectId);
+  let subtask = []
+  for(let i = 0; i < jira.data.issueTypes.length; i++){
+    if( jira.data.issueTypes[i]["subtask"]){
+      // console.log(jira.data.issueTypes);
+      console.log(req.query.jiraUrl + "rest/api/2/issue/" + jira.data.issueTypes[i].id);
+      let issue = await axios.get(req.query.jiraUrl + "rest/api/2/issue/" + jira.data.issueTypes[i].id);
+      subtask.push(issue);
     }
+  }
     // res.json(not_subtask);
-    res.json(jira.data);
-  });
+  res.json(subtask);
+
 });
 
 

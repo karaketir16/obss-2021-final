@@ -89,6 +89,11 @@ router.post('/api/v1/users/find-top-n-users', async function (req, res, next) {
 
     res.json(ans);
 });
+
+function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}
+
 // http://localhost:8080/api/v1/projects/find-min-n-issues?jiraUrl={jiraUrl}&minn={minn}&topm={topm}
 router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next) {
 
@@ -97,8 +102,11 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
 
     let users = req.body;
 
-    // console.log(users)
-    if(users.length > 0){
+    console.log(users);
+    console.log(users.length);
+    console.log(users === []);
+
+    if( (!isEmpty(users)) && users.length > 0){
         console.log(users)
         let all_issues = [];
         for (const user of users){
@@ -141,9 +149,12 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
         let ans = project_list.slice(0, topm);
 
         res.json(ans);
-    } else {
+    } else if (users.length !== undefined){
         res.status(500);
         res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":500,"errors":"usersnotfound"});
+    } else{
+        res.status(400);
+        res.json({"timestamp":moment().format("YYYY-MM-DD"),"status":400,"errors":"Requiredrequestbodyismissing"});
     }
 
 

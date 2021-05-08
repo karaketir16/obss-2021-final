@@ -217,8 +217,8 @@ router.post('/api/v1/projects/find-min-n-issues', async function (req, res, next
         return;
     }
 
-    let minn = req.query.minn ? req.query.minn : 5;
-    let topm = req.query.topm ? req.query.topm : 10;
+    let minn = (req.query.minn === undefined || req.query.minn === "")? 5 : req.query.minn;
+    let topm = (req.query.topm === undefined || req.query.topm === "" )? 10 : req.query.topm;
 
     let users = req.body;
 
